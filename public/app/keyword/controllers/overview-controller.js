@@ -114,6 +114,20 @@ define(['keyword/module', 'lodash'], function (module, _) {
         });
       }
 
+      $scope.stopProject = function (projectId) {
+        KeywordService.stop(projectId, function (data, status) {
+          if (status == 200) {
+            $.smallBox({
+                title: $rootScope.getWord('Notification'),
+                content: $rootScope.getWord('You have stopped project job'),
+                color: '#296191',
+                iconSmall: 'fa fa-check bounce animated',
+                timeout: 3000
+              });
+          }
+        });
+      }
+
       var loadEditModal = function () {
         var $modal = $('#project-edittion');
 
@@ -216,29 +230,33 @@ define(['keyword/module', 'lodash'], function (module, _) {
                   total_fail : 0 
               };
             	KeywordService.getReport($scope.projectId, job._id, function (data, status) {
+                if (status != 404) {
+                  report.created_date = data.created_date;
+                  report.job_id = data.functional_job_id;
+                  var suite_reports = JSON.parse(data.suite_reports);
+                  _.forEach(suite_reports, function (suite) {
+                    report.total_test_case += suite.total_test_case;
+                    report.total_pass += suite.total_pass;
+                    report.total_fail += suite.total_fail;
+                  });
 
-                report.created_date = data.created_date;
-                report.job_id = data.functional_job_id;
-                var suite_reports = JSON.parse(data.suite_reports);
-                _.forEach(suite_reports, function (suite) {
-                  report.total_test_case += suite.total_test_case;
-                  report.total_pass += suite.total_pass;
-                  report.total_fail += suite.total_fail;
-                });
+                  if (report.total_fail === 0) {
+                    report.test_result = 'Pass';
+                  } else report.test_result = 'Fail';
 
-                if (report.total_fail === 0) {
-                  report.test_result = 'Pass';
-                } else report.test_result = 'Fail';
+                  $scope.listReports.unshift(report);
+
+                  $.smallBox({
+                    title: $rootScope.getWord('Notification'),
+                    content: $rootScope.getWord('The job ') + job._id + $rootScope.getWord(' has completed.'),
+                    color: '#296191',
+                    iconSmall: 'fa fa-check bounce animated',
+                    timeout: 3000
+                  });
+                }
+                
   	          });
 
-              $scope.listReports.unshift(report);
-               $.smallBox({
-                title: $rootScope.getWord('Notification'),
-                content: $rootScope.getWord('The job ') + job._id + $rootScope.getWord(' has completed.'),
-                color: '#296191',
-                iconSmall: 'fa fa-check bounce animated',
-                timeout: 3000
-              });
             }
           }
         })
