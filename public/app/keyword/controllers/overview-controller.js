@@ -114,6 +114,22 @@ define(['keyword/module', 'lodash'], function (module, _) {
         });
       }
 
+      $scope.stopProject = function (projectId) {
+        KeywordService.stop(projectId, function (data, status) {
+          if (status == 200) {
+            $.smallBox({
+              title: $rootScope.getWord('Notification'),
+              content: $rootScope.getWord('Your project has been already stopped'),
+              color: '#296191',
+              iconSmall: 'fa fa-check bounce animated',
+              timeout: 3000
+            });
+            $scope.project.status = 'READY';
+          }
+
+        });
+      }
+
       var loadEditModal = function () {
         var $modal = $('#project-edittion');
 
@@ -205,7 +221,7 @@ define(['keyword/module', 'lodash'], function (module, _) {
             $scope.project.status = job.project_status;
             $scope.project.watchUrl = job.watch_url;
             $scope.project.log = job.log;
-
+            $scope.project.isBuilding = job.isBuilding;
             if (job.project_status === 'READY') {
 
               var report = { 
@@ -216,29 +232,33 @@ define(['keyword/module', 'lodash'], function (module, _) {
                   total_fail : 0 
               };
             	KeywordService.getReport($scope.projectId, job._id, function (data, status) {
+                if (status != 404) {
+                  report.created_date = data.created_date;
+                  report.job_id = data.functional_job_id;
+                  var suite_reports = JSON.parse(data.suite_reports);
+                  _.forEach(suite_reports, function (suite) {
+                    report.total_test_case += suite.total_test_case;
+                    report.total_pass += suite.total_pass;
+                    report.total_fail += suite.total_fail;
+                  });
 
-                report.created_date = data.created_date;
-                report.job_id = data.functional_job_id;
-                var suite_reports = JSON.parse(data.suite_reports);
-                _.forEach(suite_reports, function (suite) {
-                  report.total_test_case += suite.total_test_case;
-                  report.total_pass += suite.total_pass;
-                  report.total_fail += suite.total_fail;
-                });
+                  if (report.total_fail === 0) {
+                    report.test_result = 'Pass';
+                  } else report.test_result = 'Fail';
 
-                if (report.total_fail === 0) {
-                  report.test_result = 'Pass';
-                } else report.test_result = 'Fail';
+                  $scope.listReports.unshift(report);
+
+                  $.smallBox({
+                    title: $rootScope.getWord('Notification'),
+                    content: $rootScope.getWord('The job ') + job._id + $rootScope.getWord(' has completed.'),
+                    color: '#296191',
+                    iconSmall: 'fa fa-check bounce animated',
+                    timeout: 3000
+                  });
+                }
+                
   	          });
 
-              $scope.listReports.unshift(report);
-               $.smallBox({
-                title: $rootScope.getWord('Notification'),
-                content: $rootScope.getWord('The job ') + job._id + $rootScope.getWord(' has completed.'),
-                color: '#296191',
-                iconSmall: 'fa fa-check bounce animated',
-                timeout: 3000
-              });
             }
           }
         })
