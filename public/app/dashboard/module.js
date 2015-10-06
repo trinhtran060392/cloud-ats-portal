@@ -22,6 +22,7 @@ define([
                 'dashboard/dashboard-controller',
                 'services/keyword-service',
                 'services/performance-service',
+                'services/dashboard-service',
                 'services/report-service',
                 'services/script-service',
                 'keyword/directives/functional-report',
