@@ -2,16 +2,16 @@ define(['layout/module'], function (module) {
 
   'use strict';
                                                  
-  module.registerDirective('stateBreadcrumbs', ['$rootScope', '$compile', '$state', function($rootScope, $compile, $state) {
+  module.registerDirective('stateBreadcrumbs', ['$rootScope', '$compile', '$state', '$stateParams', function($rootScope, $compile, $state, $stateParams) {
     return {
       restrict: 'E',
       replace: true,
       template: '<ol class="breadcrumb"><li>Home</li></ol>',
       link: function(scope, element) {
         function setBreadcrumbs(breadcrumbs) {
-          var html = '<li>{{getWord("Home")}}</li>';
+          var html = '<li ng-click="goHome()" class="breadcrumb-clickable">{{getWord("Home")}}</li>';
           angular.forEach(breadcrumbs, function(crumb) {
-            html += '<li>{{getWord("'+crumb+'")}}</li>';
+            html += '<li ng-click="goTo($event)" class="breadcrumb-clickable">{{getWord("'+crumb+'")}}</li>';
           });
 
           element.html($compile(html)(scope));  
@@ -28,6 +28,44 @@ define(['layout/module'], function (module) {
             return fetchBreadcrumbs(parentName, breadcrumbs);
           } else {
             return breadcrumbs;
+          }
+        }
+
+        scope.goHome = function() {
+          $state.go('app.dashboard');
+        }
+
+        scope.goTo = function(event) {
+          
+          var ele = event.currentTarget;
+          var index = $(ele).index();
+
+          var state_name = $state.current.name;
+          var isPerformanceProject = undefined;
+          if (state_name.indexOf('app.performance') > -1) {
+            isPerformanceProject = true;
+          } else if (state_name.indexOf('app.keyword') > -1){
+            isPerformanceProject = false;
+          }
+
+          switch (isPerformanceProject) {
+            case true: 
+              var id = $stateParams.id;
+              if (index === 1) {
+                $state.go('app.performance', {id : id});
+              } else if (index === 2) {
+                var jobId = $stateParams.jobId;
+                $state.go('app.performance.report', {id : id, jobId : jobId});
+              }
+              break;
+            case false:
+              var id = $stateParams.id;              
+              if (index === 1) {
+                $state.go('app.keyword', {id : id});
+              }
+              break;
+            default: 
+              break;
           }
         }
 
