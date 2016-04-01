@@ -51,9 +51,9 @@
 		          </thead>
 
               <tr ng-repeat="i in case_reports track by $index">
-                <td width="10%">{{i.stt}}</td>
-                <td ng-if="!i.data_driven" width="70%"><a ng-click="redirectToTestCaseReport(i.data_source._id)">{{i.name}}</a></td>
-                <td  ng-if="i.data_driven" width="70%">
+                <td width="10%">{{$index + 1}}</td>
+                <td ng-if="!i.useDataDriven" width="70%"><a ng-click="redirectToTestCaseReport(i._id)">{{i.name}}</a></td>
+                <td  ng-if="i.useDataDriven" width="70%">
                   <a data-toggle="collapse" data-target="{{'#'+$index}}">{{i.name}}</a>
                   <div id="{{$index}}" class="collapse">
                     <table width="100%" class="fixed-table">
@@ -68,14 +68,13 @@
                     </table>
                   </div>
                 </td>
-                <td width="20%"><span  ng-class="{'label label-error': i.result === 'Fail','label label-success': i.result === 'Pass'}">{{i.result}}</span></td>
+                <td width="20%"><span  ng-class="{'label label-error': !i.isPass,'label label-success': i.isPass}">{{i.isPass ? 'Pass' : 'Fail'}}</span></td>
               </tr>
 	          </table>
           </div>
         </div>
       </div>
     </div>
-    <md-table-pagination md-limit="10" md-page="query.current" md-total="{{query.total}}" md-on-paginate="onPaginate" md-page-select md-options="[10]"></md-table-pagination>
   </div>
 </div>
 

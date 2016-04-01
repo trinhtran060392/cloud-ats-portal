@@ -253,10 +253,10 @@ define(['keyword/module'], function(module) {
           callback(data,status);
         });
       },
-      suiteReports : function(projectId, jobId, suiteId, suiteReportId, index, callback) {
+      suiteReports : function(projectId, jobId, suiteId, suiteReportId, callback) {
         var request = {
           method: 'GET',
-          url: appConfig.RestEntry + '/api/v1/project/keyword/'+ projectId +'/report/'+ jobId + '/suite/'+suiteId+'/'+suiteReportId+'?index='+index,
+          url: appConfig.RestEntry + '/api/v1/project/keyword/'+ projectId +'/report/'+ jobId + '/suite/'+suiteId+'/'+suiteReportId,
           headers: {
             'X-AUTH-TOKEN': $cookies.get('authToken'),
             'X-SPACE': $cookies.get('space'),
